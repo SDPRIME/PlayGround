@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101117">
+  <title>خانة — تحدّي XO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101117;
+      --panel: #191a23;
+      --panel-2: #20212b;
+      --line: rgba(255,255,255,.085);
+      --muted: #9293a1;
+      --white: #f7f5f2;
+      --mint: #78f0c2;
+      --mint-soft: rgba(120,240,194,.13);
+      --coral: #ff887b;
+      --coral-soft: rgba(255,136,123,.13);
+      --gold: #f3cb76;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--white);
+      font-family: 'Cairo', 'DejaVu Sans', sans-serif;
+      background:
+        radial-gradient(ellipse at 50% 43%, rgba(80,67,116,.19), transparent 49%),
+        radial-gradient(ellipse at 100% 0%, rgba(73,126,112,.09), transparent 35%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+    button { font: inherit; }
+    .page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 24px 0 30px; }
+    .topbar { height: 48px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display:flex; gap:11px; align-items:center; font-size:17px; font-weight:800; letter-spacing:-.4px; }
+    .brand-mark { width:34px; height:34px; display:grid; place-items:center; border-radius:11px; color:#11151a; background:var(--mint); font:700 25px/1 'Rajdhani',sans-serif; transform:rotate(-5deg); box-shadow:0 4px 18px #78f0c233; }
+    .brand small { display:block; margin-top:-4px; color:var(--muted); font-size:10px; font-weight:500; letter-spacing:.2px; }
+    .top-actions { display:flex; align-items:center; gap:10px; }
+    .online-pill { display:flex; gap:8px; align-items:center; color:#c8c8d0; font-size:12px; padding:8px 13px; border:1px solid var(--line); background:#ffffff05; border-radius:99px; }
+    .online-dot { width:7px; height:7px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px var(--mint); }
+    .icon-button { width:38px; height:38px; display:grid; place-items:center; color:#c5c5ce; cursor:pointer; border:1px solid var(--line); border-radius:12px; background:#ffffff05; transition:.2s; }
+    .icon-button:hover { border-color:#ffffff30; background:#ffffff0b; color:white; }
+    .icon-button svg { width:17px; height:17px; }
+    .hero { padding:22px 0 18px; text-align:center; }
+    .eyebrow { display:flex; justify-content:center; align-items:center; gap:9px; color:var(--mint); font-size:11px; font-weight:700; letter-spacing:1.3px; }
+    .eyebrow:before,.eyebrow:after { content:''; width:24px; height:1px; background:linear-gradient(90deg, transparent, #78f0c280); }
+    .eyebrow:after { transform:scaleX(-1); }
+    h1 { margin:8px 0 0; font-size:clamp(29px, 4vw, 42px); line-height:1.38; letter-spacing:-1.6px; font-weight:800; }
+    h1 span { color:var(--mint); }
+    .subtitle { margin:3px 0 0; color:var(--muted); font-size:13px; font-weight:400; }
+    .arena { position:relative; border:1px solid #ffffff11; border-radius:25px; padding:17px 30px 16px; background:linear-gradient(145deg,#1b1c25f2,#171820f5); box-shadow:0 24px 80px #0005, inset 0 1px #ffffff08; }
+    .scoreboard { display:grid; grid-template-columns:1fr 142px 1fr; gap:12px; align-items:stretch; margin-bottom:18px; }
+    .player-card,.round-card { position:relative; min-height:83px; display:flex; align-items:center; gap:13px; padding:12px 17px; border:1px solid var(--line); border-radius:17px; background:#ffffff04; transition:border-color .25s, background .25s, transform .25s; }
+    .player-card.active-x { border-color:#ff887b55; background:linear-gradient(100deg,var(--coral-soft),#ffffff03 70%); }
+    .player-card.active-o { border-color:#78f0c255; background:linear-gradient(100deg,var(--mint-soft),#ffffff03 70%); }
+    .player-card.winner { animation:winnerPulse 1s ease-in-out infinite alternate; }
+    @keyframes winnerPulse { to { box-shadow:0 0 26px #f3cb762c; border-color:#f3cb7680; } }
+    .avatar { flex:0 0 45px; width:45px; height:45px; display:grid; place-items:center; border-radius:14px; }
+    .avatar.x { color:var(--coral); background:var(--coral-soft); }
+    .avatar.o { color:var(--mint); background:var(--mint-soft); }
+    .avatar svg { width:24px; height:24px; }
+    .player-details { min-width:0; flex:1; }
+    .player-label { color:var(--muted); font-size:11px; }
+    .player-name { margin-top:-1px; font-size:15px; font-weight:700; }
+    .player-score { margin-inline-start:auto; font:700 30px/1 'Rajdhani',sans-serif; }
+    .player-card:first-child .player-score { color:var(--coral); }
+    .player-card:last-child .player-score { color:var(--mint); }
+    .turn-indicator { display:none; align-items:center; gap:5px; margin-top:1px; color:#d5d4dd; font-size:10px; }
+    .turn-indicator i { width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .active-x .turn-indicator,.active-o .turn-indicator { display:flex; }
+    .round-card { justify-content:center; flex-direction:column; gap:1px; padding:10px; text-align:center; }
+    .round-label { color:var(--muted); font-size:10px; }
+    .round-number { color:#f5f2eb; font:700 25px/1.1 'Rajdhani',sans-serif; letter-spacing:1px; }
+    .round-number span { color:#60616d; font-size:16px; }
+    .status-bar { min-height:45px; display:flex; align-items:center; justify-content:center; gap:9px; margin:0 0 12px; text-align:center; }
+    .status-icon { width:25px; height:25px; display:grid; place-items:center; border-radius:8px; color:var(--mint); background:var(--mint-soft); }
+    .status-icon svg { width:15px; height:15px; }
+    .status-text { font-size:14px; font-weight:600; }
+    .status-text .accent { color:var(--mint); }
+    .board-wrap { position:relative; width:min(100%, 350px); margin:0 auto; }
+    .board { position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; aspect-ratio:1; padding:11px; border:1px solid #ffffff0b; border-radius:22px; background:#111219; box-shadow:inset 0 2px 20px #0004, 0 16px 34px #0002; }
+    .cell { position:relative; display:grid; place-items:center; min-width:0; padding:0; overflow:hidden; border:1px solid #ffffff0c; border-radius:15px; color:white; background:linear-gradient(145deg,#22232d,#1d1e27); cursor:pointer; transition:transform .16s,background .2s,border-color .2s,box-shadow .2s; -webkit-tap-highlight-color:transparent; }
+    .cell:not(:disabled):hover { transform:translateY(-2px); border-color:#ffffff26; background:#262731; box-shadow:0 8px 18px #0003; }
+    .cell:focus-visible,.icon-button:focus-visible,.action-button:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+    .cell:disabled { cursor:default; }
+    .cell svg { width:43%; height:43%; overflow:visible; }
+    .cell .mark-x line { stroke:var(--coral); stroke-width:7; stroke-linecap:round; fill:none; }
+    .cell .mark-o circle { stroke:var(--mint); stroke-width:6.5; fill:none; }
+    .cell.played { animation:popIn .3s cubic-bezier(.15,1.5,.4,1) both; }
+    @keyframes popIn { from { transform:scale(.62); opacity:.25; } to { transform:scale(1); opacity:1; } }
+    .cell.win-cell { border-color:#f3cb7680; background:linear-gradient(145deg,#393327,#25232a); box-shadow:0 0 22px #f3cb7623, inset 0 0 20px #f3cb760a; animation:winCell .65s ease-in-out infinite alternate; }
+    @keyframes winCell { to { transform:scale(1.025); } }
+    .board-footer { display:flex; align-items:center; justify-content:space-between; margin:12px 3px 0; color:var(--muted); font-size:11px; }
+    .move-counter { display:flex; align-items:center; gap:6px; }
+    .move-counter svg { width:14px; height:14px; opacity:.7; }
+    .keyboard-hint { display:flex; align-items:center; gap:5px; direction:rtl; }
+    kbd { min-width:21px; padding:1px 5px; border:1px solid #ffffff20; border-radius:5px; color:#d0ced8; background:#ffffff08; font:11px 'Cairo',sans-serif; text-align:center; }
+    .controls { display:flex; justify-content:center; gap:9px; margin-top:19px; }
+    .action-button { min-height:42px; display:flex; justify-content:center; align-items:center; gap:8px; padding:0 17px; border:1px solid var(--line); border-radius:12px; color:#dddce3; background:#ffffff06; cursor:pointer; font-size:12px; font-weight:700; transition:.2s; }
+    .action-button:hover:not(:disabled) { border-color:#ffffff29; background:#ffffff0d; transform:translateY(-1px); }
+    .action-button:disabled { opacity:.38; cursor:not-allowed; }
+    .action-button.primary { color:#12191a; border-color:var(--mint); background:var(--mint); box-shadow:0 5px 20px #78f0c21d; }
+    .action-button.primary:hover:not(:disabled) { border-color:#9bffdc; background:#9bffdc; }
+    .action-button svg { width:15px; height:15px; }
+    .bottom-note { display:flex; align-items:center; justify-content:center; gap:7px; margin-top:17px; color:#777884; font-size:11px; }
+    .bottom-note svg { width:13px; height:13px; color:var(--gold); }
+    .confetti-layer { position:absolute; inset:-30px 0 0; overflow:hidden; pointer-events:none; }
+    .confetti { position:absolute; top:44%; width:8px; height:12px; opacity:0; border-radius:2px; animation:confettiFall 1.5s ease-out forwards; }
+    @keyframes confettiFall { 0% { opacity:1; transform:translateY(0) rotate(0) scale(1); } 100% { opacity:0; transform:translateY(var(--fall)) rotate(var(--spin)) scale(.5); } }
+    footer { display:flex; justify-content:center; gap:6px; margin-top:17px; color:#5f606b; font-size:10px; }
+    footer b { color:#a0a0aa; font-weight:600; }
+    @media (min-width: 900px) { .arena { padding:17px 34px 15px; } .board-wrap { width:min(100%, 350px); } }
+    @media (max-width: 600px) {
+      .page { width:calc(100% - 28px); padding:14px 0 22px; }
+      .topbar { height:42px; }
+      .brand { font-size:15px; }
+      .brand-mark { width:31px;height:31px; }
+      .online-pill { font-size:10px; padding:7px 10px; }
+      .icon-button { width:35px;height:35px; }
+      .hero { padding:25px 0 19px; }
+      h1 { font-size:31px; }
+      .subtitle { font-size:11px; }
+      .arena { padding:13px 12px 15px; border-radius:21px; }
+      .scoreboard { grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+      .player-card { min-height:70px; gap:9px; padding:9px; border-radius:14px; }
+      .player-card:first-child { grid-column:1; grid-row:1; }
+      .player-card:last-child { grid-column:2; grid-row:1; }
+      .round-card { grid-column:1 / -1; grid-row:2; min-height:34px; flex-direction:row; gap:8px; border-radius:11px; }
+      .round-number { font-size:19px; }
+      .round-number span { font-size:13px; }
+      .avatar { flex-basis:37px; width:37px; height:37px; border-radius:11px; }
+      .avatar svg { width:21px;height:21px; }
+      .player-name { font-size:12px; }
+      .player-label { font-size:9px; }
+      .player-score { font-size:25px; }
+      .turn-indicator { font-size:8px; }
+      .status-bar { min-height:37px; margin-bottom:8px; }
+      .status-text { font-size:12px; }
+      .status-icon { width:22px;height:22px; }
+      .board-wrap { width:min(100%, 380px); }
+      .board { gap:8px; padding:8px; border-radius:18px; }
+      .cell { border-radius:12px; }
+      .board-footer { margin-top:9px; font-size:10px; }
+      .controls { margin-top:14px; gap:7px; }
+      .action-button { min-height:40px; padding:0 12px; font-size:11px; }
+      .bottom-note { margin-top:12px; font-size:10px; }
+      footer { margin-top:12px; }
+    }
+    @media (max-width: 370px) { .online-pill { display:none; } .page { width:calc(100% - 22px); } .arena { padding-inline:9px; } .player-card { gap:6px; } .avatar { flex-basis:33px;width:33px;height:33px; } .player-score {font-size:22px;} }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark" aria-hidden="true">×</div><div>خانة<small>تحدّى صديقك</small></div></div>
+      <div class="top-actions">
+        <div class="online-pill"><span class="online-dot"></span> مباراة محلية · لاعبان</div>
+        <button class="icon-button" id="sound-toggle" type="button" aria-label="تشغيل الصوت" title="تشغيل / كتم الصوت">
+          <svg id="sound-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19 6a9 9 0 0 1 0 12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="eyebrow">مواجهة الأذكياء</div>
+      <h1 id="page-title">ثلاثة في <span>صف</span></h1>
+      <p class="subtitle">خطّط لحركتك، وسبق خصمك إلى خطّ الفوز.</p>
+    </section>
+
+    <section class="arena" aria-label="لعبة إكس أو">
+      <div class="scoreboard" aria-label="النتيجة">
+        <article class="player-card" id="player-x">
+          <div class="avatar x" aria-hidden="true"><svg class="mark-x" viewBox="0 0 32 32"><path d="m8 8 16 16M24 8 8 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></div>
+          <div class="player-details"><div class="player-label">اللاعب الأول</div><div class="player-name">فريق X</div><div class="turn-indicator"><i></i> دورك الآن</div></div>
+          <div class="player-score" id="score-x" aria-label="انتصارات اللاعب الأول">0</div>
+        </article>
+        <div class="round-card"><div class="round-label">الجولة</div><div class="round-number"><span id="round-number">01</span> <span>/</span> ∞</div></div>
+        <article class="player-card" id="player-o">
+          <div class="avatar o" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="4"/></svg></div>
+          <div class="player-details"><div class="player-label">اللاعب الثاني</div><div class="player-name">فريق O</div><div class="turn-indicator"><i></i> دورك الآن</div></div>
+          <div class="player-score" id="score-o" aria-label="انتصارات اللاعب الثاني">0</div>
+        </article>
+      </div>
+
+      <div class="status-bar" aria-live="polite" aria-atomic="true">
+        <span class="status-icon" id="status-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg></span>
+        <div class="status-text" id="status-text">دور <span class="accent">فريق X</span> — اختر خانتك</div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="لوحة اللعب، 3 في 3"></div>
+        <div class="confetti-layer" id="confetti-layer" aria-hidden="true"></div>
+      </div>
+      <div class="board-footer">
+        <span class="move-counter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>الحركات <b id="move-count">٠</b> / ٩</span>
+        <span class="keyboard-hint"><kbd>١–٩</kbd> للّعب</span>
+      </div>
+      <div class="controls">
+        <button class="action-button primary" id="new-round" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>جولة جديدة</button>
+        <button class="action-button" id="undo" type="button" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/></svg>تراجع</button>
+        <button class="action-button" id="reset-match" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.64-6.36L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>تصفير النتيجة</button>
+      </div>
+      <div class="bottom-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.4 5.2 5.6.7-4.1 3.9 1 5.6-4.9-2.8-4.9 2.8 1-5.6L4 8.9l5.6-.7L12 3Z"/></svg>الفوز للأسرع في تكوين خط من ثلاث خانات</div>
+    </section>
+    <footer><span>مصمّمة للمنافسة</span><b>✦</b><span>جولة بعد جولة</span></footer>
+  </main>
+<script>
+(() => {
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status-text');
+  const statusIcon = document.getElementById('status-icon');
+  const scoreXEl = document.getElementById('score-x');
+  const scoreOEl = document.getElementById('score-o');
+  const moveCountEl = document.getElementById('move-count');
+  const undoButton = document.getElementById('undo');
+  const roundNumberEl = document.getElementById('round-number');
+  const confettiLayer = document.getElementById('confetti-layer');
+  const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+  let cells = Array(9).fill('');
+  let history = [];
+  let turn = 'X';
+  let starting = 'X';
+  let ended = false;
+  let round = 1;
+  let scores = {X:0,O:0,draw:0};
+  let soundOn = false;
+  let audio;
+
+  function icon(mark, cls = '') {
+    if (mark === 'X') return `<svg class="mark-x ${cls}" viewBox="0 0 40 40" aria-hidden="true"><line x1="8" y1="8" x2="32" y2="32"/><line x1="32" y1="8" x2="8" y2="32"/></svg>`;
+    return `<svg class="mark-o ${cls}" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="13"/></svg>`;
+  }
+  function render() {
+    boardEl.innerHTML = '';
+    cells.forEach((value, i) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'cell' + (value ? ' played' : '');
+      button.setAttribute('role','gridcell');
+      button.setAttribute('aria-label', value ? `الخانة ${i+1}، ${value === 'X' ? 'إكس' : 'أو'}` : `الخانة ${i+1}، فارغة`);
+      button.dataset.index = i;
+      button.disabled = Boolean(value) || ended;
+      if (value) button.innerHTML = icon(value);
+      button.addEventListener('click', () => play(i));
+      boardEl.appendChild(button);
+    });
+    moveCountEl.textContent = arabicDigits[history.length];
+    undoButton.disabled = history.length === 0 || ended;
+    roundNumberEl.textContent = String(round).padStart(2,'0');
+    scoreXEl.textContent = scores.X;
+    scoreOEl.textContent = scores.O;
+    document.getElementById('player-x').classList.toggle('active-x', !ended && turn === 'X');
+    document.getElementById('player-x').classList.toggle('winner', ended && turn === 'X' && checkWinner());
+    document.getElementById('player-o').classList.toggle('active-o', !ended && turn === 'O');
+    document.getElementById('player-o').classList.toggle('winner', ended && turn === 'O' && checkWinner());
+  }
+  function checkWinner() { return wins.find(line => line.every(i => cells[i] === turn)); }
+  function play(index) {
+    if (ended || cells[index]) return;
+    cells[index] = turn;
+    history.push(index);
+    sound('move');
+    const line = checkWinner();
+    if (line) {
+      ended = true;
+      scores[turn]++;
+      statusEl.innerHTML = `فاز <span class="accent">فريق ${turn}</span>! أحسنتم 🎉`;
+      statusIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>';
+      line.forEach(i => boardEl.children[i]?.classList.add('win-cell'));
+      sound('win');
+      celebrate();
+    } else if (history.length === 9) {
+      ended = true;
+      scores.draw++;
+      statusEl.innerHTML = 'تعادل! <span class="accent">مواجهة متكافئة</span> — جولة أخرى؟';
+      statusIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 8h14M5 16h14"/><path d="M8 5v14m8-14v14"/></svg>';
+      sound('draw');
+    } else {
+      turn = turn === 'X' ? 'O' : 'X';
+      statusEl.innerHTML = `دور <span class="accent">فريق ${turn}</span> — اختر خانتك`;
+      statusIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>';
+    }
+    render();
+    if (line) line.forEach(i => boardEl.children[i]?.classList.add('win-cell'));
+  }
+  function newRound() {
+    if (!ended && history.length) {
+      // Starting a fresh round intentionally abandons the current board.
+    }
+    if (ended) { round++; starting = starting === 'X' ? 'O' : 'X'; }
+    cells = Array(9).fill(''); history = []; turn = starting; ended = false;
+    confettiLayer.innerHTML = '';
+    statusEl.innerHTML = `دور <span class="accent">فريق ${turn}</span> — اختر خانتك`;
+    statusIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>';
+    render();
+  }
+  function undo() {
+    if (ended || !history.length) return;
+    const index = history.pop();
+    cells[index] = '';
+    turn = turn === 'X' ? 'O' : 'X';
+    statusEl.innerHTML = `دور <span class="accent">فريق ${turn}</span> — اختر خانتك`;
+    render();
+  }
+  function resetMatch() {
+    scores = {X:0,O:0,draw:0};
+    round = 1; starting = 'X'; ended = false;
+    newRound();
+  }
+  function celebrate() {
+    const colors = ['#78f0c2','#ff887b','#f3cb76','#b9a2ff','#f7f5f2'];
+    for (let i=0;i<42;i++) {
+      const bit = document.createElement('i');
+      bit.className = 'confetti';
+      bit.style.left = `${Math.random()*100}%`;
+      bit.style.background = colors[i % colors.length];
+      bit.style.setProperty('--fall', `${100 + Math.random()*220}px`);
+      bit.style.setProperty('--spin', `${180 + Math.random()*700}deg`);
+      bit.style.animationDelay = `${Math.random()*.25}s`;
+      confettiLayer.appendChild(bit);
+    }
+    setTimeout(() => { confettiLayer.innerHTML = ''; }, 2200);
+  }
+  function sound(type) {
+    if (!soundOn) return;
+    try {
+      audio ||= new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const osc = audio.createOscillator(), gain = audio.createGain();
+      osc.connect(gain); gain.connect(audio.destination);
+      const now = audio.currentTime;
+      const frequencies = type === 'win' ? [523,659,784] : type === 'draw' ? [330,294] : [type === 'toggle' ? 600 : 420];
+      frequencies.forEach((frequency,i) => {
+        const node = i ? audio.createOscillator() : osc;
+        if (i) node.connect(gain);
+        node.type = 'sine'; node.frequency.setValueAtTime(frequency, now + i*.12);
+        gain.gain.setValueAtTime(.0001, now + i*.12);
+        gain.gain.exponentialRampToValueAtTime(type === 'move' ? .045 : .065, now + i*.12 + .015);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + i*.12 + .17);
+        node.start(now + i*.12); node.stop(now + i*.12 + .18);
+      });
+    } catch (_) { /* Audio is optional. */ }
+  }
+  document.getElementById('new-round').addEventListener('click', newRound);
+  document.getElementById('undo').addEventListener('click', undo);
+  document.getElementById('reset-match').addEventListener('click', resetMatch);
+  document.getElementById('sound-toggle').addEventListener('click', event => {
+    soundOn = !soundOn;
+    event.currentTarget.setAttribute('aria-label', soundOn ? 'كتم الصوت' : 'تشغيل الصوت');
+    document.getElementById('sound-icon').innerHTML = soundOn
+      ? '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19 6a9 9 0 0 1 0 12"/>'
+      : '<path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m17 9 5 6m0-6-5 6"/>';
+    sound('toggle');
+  });
+  document.addEventListener('keydown', event => {
+    if (/^[1-9]$/.test(event.key) && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT','TEXTAREA','SELECT','BUTTON'].includes(target.tagName))) return;
+      play(Number(event.key)-1);
+    }
+    if (event.key === 'Backspace' && !(event.target instanceof HTMLElement && ['INPUT','TEXTAREA'].includes(event.target.tagName))) undo();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
