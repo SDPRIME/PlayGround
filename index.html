@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#04121a" />
+    <meta name="description" content="خماسي — لعبة كرة قدم ٥ ضد ٥ أونلاين في ملعب خماسي ليلي. KHAMASI is a fast 5v5 online football game." />
+    <title>خماسي | KHAMASI — 5v5 Online Football</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2305121b'/%3E%3Cpath d='M32 10l18 9v12c0 12-8 19-18 23-10-4-18-11-18-23V19z' fill='%23d9ff43'/%3E%3Cpath d='M32 18l10 5v8c0 8-4 12-10 16-6-4-10-8-10-16v-8z' fill='%2305121b'/%3E%3Ccircle cx='32' cy='33' r='5' fill='%23d9ff43'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="arena" aria-label="ملعب خماسي ثلاثي الأبعاد"></canvas>
+      <div class="fx-vignette"></div>
+      <div class="fx-grain"></div>
+
+      <div id="boot" class="boot-screen">
+        <div class="boot-mark">
+          <span class="boot-ball"></span>
+          <span>KHAMASI</span>
+        </div>
+        <div class="boot-line"><i></i></div>
+        <p>جارٍ تجهيز الأجواء…</p>
+      </div>
+
+      <div id="ui" class="ui-layer">
+        <header id="topbar" class="topbar is-hidden">
+          <div class="topbar-left">
+            <div class="mini-logo"><span>K</span></div>
+            <div class="live-pill"><i></i><span id="net-label">BOT MATCH</span></div>
+          </div>
+          <div id="scorebug" class="scorebug">
+            <div class="score-team home">
+              <span class="score-code" id="home-code">NOR</span>
+              <span class="score-badge" id="home-badge">N</span>
+            </div>
+            <div class="score-center">
+              <div class="score-numbers"><b id="home-score">0</b><span class="score-dash">–</span><b id="away-score">0</b></div>
+              <div class="score-clock"><span id="clock">03:00</span><em id="half-label">H1</em></div>
+            </div>
+            <div class="score-team away">
+              <span class="score-badge" id="away-badge">F</span>
+              <span class="score-code" id="away-code">FAL</span>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <button id="sound-btn" class="icon-btn" aria-label="الصوت" title="الصوت">
+              <svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9H5zm11.5-.9a5.5 5.5 0 010 7.8M19 5.5a9 9 0 010 13"/></svg>
+            </button>
+            <button id="pause-btn" class="icon-btn" aria-label="إيقاف مؤقت" title="إيقاف مؤقت">
+              <svg viewBox="0 0 24 24"><path d="M7 5h3v14H7zm7 0h3v14h-3z"/></svg>
+            </button>
+          </div>
+        </header>
+
+        <section id="menu" class="menu screen is-active">
+          <div class="menu-head">
+            <div class="brand-lockup">
+              <div class="brand-crest"><span>K</span></div>
+              <div>
+                <strong>KHAMASI</strong>
+                <small>FIVE-A-SIDE LEAGUE</small>
+              </div>
+            </div>
+            <div class="season-chip"><i></i> SEASON 01 <span>•</span> NIGHT ARENA</div>
+          </div>
+
+          <div class="menu-hero">
+            <div class="hero-title-wrap">
+              <p class="eyebrow"><span>٥ ضد ٥</span> كرة قدم خماسية</p>
+              <h1 class="hero-title">
+                <span class="title-fill">خماسي</span>
+                <span class="title-outline">KHAMASI</span>
+              </h1>
+              <p class="hero-sub">سريع، متوتر، وأونلاين.<br />اصنع اسمك داخل القفص.</p>
+              <div class="hero-stats">
+                <div><b>5</b><span>ضد 5</span></div>
+                <div><b>3</b><span>دقائق لكل شوط</span></div>
+                <div><b>1</b><span>لقب واحد</span></div>
+              </div>
+            </div>
+
+            <aside class="game-panel">
+              <div class="panel-top">
+                <span class="panel-kicker">MATCH CENTER</span>
+                <span id="online-status" class="status-chip"><i></i> ONLINE READY</span>
+              </div>
+
+              <div class="team-select">
+                <div class="team-select-head">
+                  <span>اختر فريقك</span>
+                  <div class="team-arrows">
+                    <button id="team-prev" class="arrow-btn" aria-label="الفريق السابق">‹</button>
+                    <button id="team-next" class="arrow-btn" aria-label="الفريق التالي">›</button>
+                  </div>
+                </div>
+                <div id="selected-team" class="selected-team">
+                  <div class="team-crest-large" id="team-crest-big"><span>N</span><i></i></div>
+                  <div class="selected-meta">
+                    <span class="selected-city" id="team-city">AL NOOR</span>
+                    <h2 id="team-name">النور</h2>
+                    <div class="team-tags" id="team-tags"><span>هجوم</span><span>سرعة</span></div>
+                  </div>
+                  <div class="team-overall"><b id="team-ovr">87</b><span>OVR</span></div>
+                </div>
+                <div id="team-strip" class="team-strip"></div>
+              </div>
+
+              <div class="mode-grid">
+                <button id="play-quick" class="mode-btn primary">
+                  <span class="mode-icon">
+                    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  </span>
+                  <span class="mode-copy"><b>مباراة سريعة</b><small>ضد الذكاء الاصطناعي</small></span>
+                  <span class="mode-key">↵</span>
+                </button>
+                <button id="play-online" class="mode-btn">
+                  <span class="mode-icon">
+                    <svg viewBox="0 0 24 24"><path d="M8.5 11a3.5 3.5 0 110-7 3.5 3.5 0 010 7zM2 20c0-3.6 2.9-6.5 6.5-6.5S15 16.4 15 20M16 8h6M19 5v6M16.5 17h5M19 14.5v5"/></svg>
+                  </span>
+                  <span class="mode-copy"><b>لعب أونلاين</b><small>غرفة خاصة 1 ضد 1</small></span>
+                  <span class="mode-badge">P2P</span>
+                </button>
+              </div>
+
+              <div class="panel-footer">
+                <button id="how-btn" class="text-btn">طريقة اللعب</button>
+                <span class="panel-note">WASD + SPACE</span>
+                <button id="quality-btn" class="text-btn">جودة: عالية</button>
+              </div>
+            </aside>
+          </div>
+
+          <footer class="menu-footer">
+            <div class="footer-left">
+              <span class="dot"></span> ARENA LIVE
+              <span class="footer-sep"></span>
+              <span>AL NOOR CAGE • 20:45</span>
+            </div>
+            <div class="footer-right">
+              <span>أفضل تجربة مع سماعات</span>
+              <span class="footer-sep"></span>
+              <span>v1.0</span>
+            </div>
+          </footer>
+        </section>
+
+        <section id="hud" class="hud screen">
+          <div id="event-feed" class="event-feed"></div>
+          <div class="hud-bottom">
+            <div id="player-card" class="player-card">
+              <span class="player-num" id="player-num">10</span>
+              <div class="player-info">
+                <small id="player-role">MIDFIELDER</small>
+                <b id="player-name">Y. ALI</b>
+                <div class="stamina"><i id="stamina-fill"></i></div>
+              </div>
+            </div>
+            <div id="charge-wrap" class="charge-wrap">
+              <span>POWER</span>
+              <div class="charge-track"><i id="charge-fill"></i></div>
+            </div>
+            <div class="desktop-hints" id="desktop-hints">
+              <span><kbd>WASD</kbd> حركة</span>
+              <span><kbd>SHIFT</kbd> سرعة</span>
+              <span><kbd>E</kbd> تمرير</span>
+              <span><kbd>SPACE</kbd> تسديد</span>
+              <span><kbd>Q</kbd> تبديل</span>
+            </div>
+          </div>
+
+          <div id="mobile-controls" class="mobile-controls">
+            <div id="joystick-zone" class="joystick-zone">
+              <div class="joystick-base"><div id="joystick-knob" class="joystick-knob"></div></div>
+            </div>
+            <div class="action-cluster">
+              <button class="touch-btn pass" data-action="pass"><span>E</span><small>تمرير</small></button>
+              <button class="touch-btn shoot" data-action="shoot"><span>SPACE</span><small>تسديد</small></button>
+              <button class="touch-btn tackle" data-action="tackle"><span>F</span><small>قطع</small></button>
+              <button class="touch-btn sprint" data-action="sprint"><span>⇧</span><small>سرعة</small></button>
+              <button class="touch-btn switch" data-action="switch"><span>Q</span><small>تبديل</small></button>
+            </div>
+          </div>
+        </section>
+
+        <div id="goal-overlay" class="goal-overlay">
+          <div class="goal-rays"></div>
+          <div class="goal-content">
+            <span class="goal-kicker">GOAL! GOAL! GOAL!</span>
+            <h2>هدف<span>!</span></h2>
+            <div class="goal-scorer"><span id="goal-team">النور</span><b id="goal-player">Y. ALI</b><em id="goal-minute">04'</em></div>
+            <div class="goal-line"></div>
+          </div>
+        </div>
+
+        <div id="countdown" class="countdown-overlay">
+          <span id="countdown-label">KICK OFF</span>
+          <b id="countdown-num">3</b>
+        </div>
+
+        <section id="pause" class="modal-layer">
+          <div class="modal-card pause-card">
+            <span class="panel-kicker">MATCH PAUSED</span>
+            <h2>توقف الوقت</h2>
+            <p id="pause-sub">خذ نفساً. المباراة تنتظرك.</p>
+            <button id="resume-btn" class="big-btn primary">متابعة اللعب</button>
+            <div class="modal-row">
+              <button id="restart-btn" class="big-btn ghost">إعادة المباراة</button>
+              <button id="quit-btn" class="big-btn ghost">الرئيسية</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="online-modal" class="modal-layer">
+          <div class="modal-card online-card">
+            <button class="close-btn" id="online-close" aria-label="إغلاق">×</button>
+            <span class="panel-kicker">ONLINE PLAY</span>
+            <h2>غرفة الأونلاين</h2>
+            <p class="modal-lead">العب ٥ ضد ٥ مع صديق. أنتما تقودان الفريقين، والباقي يلعبه الذكاء الاصطناعي.</p>
+            <div class="online-tabs">
+              <button id="tab-host" class="online-tab active">إنشاء غرفة</button>
+              <button id="tab-join" class="online-tab">الانضمام برمز</button>
+            </div>
+            <div id="host-pane" class="online-pane active">
+              <div class="room-code-box">
+                <span>رمز الغرفة</span>
+                <b id="room-code">-----</b>
+                <button id="copy-code" class="copy-btn">نسخ</button>
+              </div>
+              <div class="online-state"><i></i><span id="host-status">جارٍ إنشاء الغرفة…</span></div>
+              <button id="host-start" class="big-btn primary" disabled>ابدأ المباراة</button>
+              <small class="privacy-note">اتصال مباشر مشفّر بين المتصفحين عبر WebRTC.</small>
+            </div>
+            <div id="join-pane" class="online-pane">
+              <label class="code-label" for="join-code">أدخل رمز الغرفة</label>
+              <input id="join-code" class="code-input" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ABC12" />
+              <div class="online-state"><i></i><span id="join-status">جاهز للاتصال</span></div>
+              <button id="join-btn" class="big-btn primary">اتصال</button>
+              <small class="privacy-note">يجب أن يكون الخصم قد أنشأ الغرفة أولاً.</small>
+            </div>
+          </div>
+        </section>
+
+        <section id="how-modal" class="modal-layer">
+          <div class="modal-card how-card">
+            <button class="close-btn" id="how-close" aria-label="إغلاق">×</button>
+            <span class="panel-kicker">THE CAGE</span>
+            <h2>طريقة اللعب</h2>
+            <div class="how-grid">
+              <div><kbd>WASD</kbd><b>تحرك</b><span>استخدم الأسهم أيضاً</span></div>
+              <div><kbd>SHIFT</kbd><b>سرعة</b><span>تستهلك اللياقة</span></div>
+              <div><kbd>E</kbd><b>تمرير</b><span>تمريرة ذكية للأمام</span></div>
+              <div><kbd>SPACE</kbd><b>تسديد</b><span>اضغط مطولاً لشحن القوة</span></div>
+              <div><kbd>F</kbd><b>قطع</b><span>تدخل سريع للكرة</span></div>
+              <div><kbd>Q</kbd><b>تبديل</b><span>انتقل لأقرب لاعب</span></div>
+            </div>
+            <div class="how-tip">على الجوال: عصا التحكم يسار، وأزرار الحركة يمين. المباراة شوطان، ٣ دقائق لكل شوط.</div>
+            <button class="big-btn primary" id="how-start">فهمت — هيا نلعب</button>
+          </div>
+        </section>
+
+        <section id="fulltime" class="modal-layer">
+          <div class="modal-card result-card">
+            <span class="panel-kicker">FULL TIME</span>
+            <div class="result-score">
+              <div><span class="result-badge" id="ft-home-badge">N</span><b id="ft-home-score">0</b><small id="ft-home-name">النور</small></div>
+              <em>–</em>
+              <div><span class="result-badge" id="ft-away-badge">F</span><b id="ft-away-score">0</b><small id="ft-away-name">الصقور</small></div>
+            </div>
+            <h2 id="ft-title">نهاية المباراة</h2>
+            <p id="ft-sub">لعبة جيدة. الملعب يتذكر كل شيء.</p>
+            <button id="rematch-btn" class="big-btn primary">مباراة أخرى</button>
+            <div class="modal-row">
+              <button id="ft-menu-btn" class="big-btn ghost">الرئيسية</button>
+              <button id="ft-share-btn" class="big-btn ghost">مشاركة النتيجة</button>
+            </div>
+          </div>
+        </section>
+
+        <div id="toast" class="toast"><i></i><span id="toast-text"></span></div>
+        <div id="rotate-hint" class="rotate-hint">
+          <span>↻</span>
+          <b>أدر شاشتك أفقياً</b>
+          <small>لتجربة ملعب أفضل</small>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
