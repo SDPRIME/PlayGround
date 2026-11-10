@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#16252c">
+<title>السبّاك في البيت</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap');
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#16252c;font-family:Almarai,"Noto Sans Arabic",Arial,sans-serif;touch-action:none}canvas{display:block;width:100vw;height:100vh;touch-action:none}
+</style>
+</head>
+<body><canvas id="game" aria-label="لعبة السباك في البيت"></canvas>
+<script>
+(()=>{
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const W=1280,H=720,N=5,dirs=[{x:0,y:-1,n:'N'},{x:1,y:0,n:'E'},{x:0,y:1,n:'S'},{x:-1,y:0,n:'W'}];
+let dpr=1,scale=1,ox=0,oy=0,board=[],level=1,hints=2,won=false,muted=false,started=performance.now(),winAt=0,waterTick=0,hover=null;
+const routes=[[[0,2],[1,2],[1,1],[2,1],[2,0],[3,0],[3,1],[4,1],[4,2]],[[0,2],[1,2],[1,3],[2,3],[2,4],[3,4],[3,3],[4,3],[4,2]],[[0,2],[1,2],[1,1],[2,1],[3,1],[3,0],[4,0],[4,1],[4,2]],[[0,2],[1,2],[2,2],[2,1],[2,0],[3,0],[3,1],[3,2],[4,2]]];
+const bx=72,by=158,cell=88,gap=8;
+function resize(){dpr=Math.min(devicePixelRatio||1,2);canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;scale=Math.min(innerWidth/W,innerHeight/H);ox=(innerWidth-W*scale)/2;oy=(innerHeight-H*scale)/2;ctx.setTransform(dpr*scale,0,0,dpr*scale,dpr*ox,dpr*oy)}
+addEventListener('resize',resize);resize();
+function rand(n){return Math.floor(Math.random()*n)}
+function mod(v,n){return ((v%n)+n)%n}
+function rotate(conns,r){return conns.map(d=>mod(d+r,4))}
+function dirsFor(a,b){const dx=b[0]-a[0],dy=b[1]-a[1];return [dy<0?0:dx>0?1:dy>0?2:3]}
+function edgeDir(a,b){if(b[0]>a[0])return 1;if(b[0]<a[0])return 3;if(b[1]>a[1])return 2;return 0}
+function newGame(){won=false;winAt=0;started=performance.now();const route=routes[(level-1)%routes.length],map=new Map();
+for(let i=0;i<route.length;i++){let con=[];if(i>0)con.push(edgeDir(route[i],route[i-1]));if(i<route.length-1)con.push(edgeDir(route[i],route[i+1]));let kind=i===0?'source':i===route.length-1?'sink':con[0]%2===con[1]%2?'straight':'elbow';if(kind==='straight')con=[con[0],mod(con[0]+2,4)];map.set(`${route[i][0]},${route[i][1]}`,{x:route[i][0],y:route[i][1],kind,base:con,rot:rand(4),solution:con.slice()});}
+board=[];for(let y=0;y<N;y++)for(let x=0;x<N;x++){let t=map.get(`${x},${y}`);if(!t){let kind=Math.random()<.54?'elbow':'straight',base=kind==='elbow'?[0,1]:[0,2];t={x,y,kind,base,rot:rand(4),solution:[]};}board.push(t)}
+if(connected().won){const start=board.find(t=>t.kind==='source');start.rot=mod(start.rot+1,4)}
+}
+function actual(t){return rotate(t.base,t.rot)}
+function connected(){const start=board.find(t=>t.kind==='source'),visited=new Set();if(!start)return {visited,won:false};let q=[start];visited.add(`${start.x},${start.y}`);while(q.length){let t=q.shift();for(const d of actual(t)){const nx=t.x+dirs[d].x,ny=t.y+dirs[d].y;if(nx<0||nx>=N||ny<0||ny>=N)continue;const n=board[ny*N+nx],back=mod(d+2,4);if(actual(n).includes(back)){let key=`${nx},${ny}`;if(!visited.has(key)){visited.add(key);q.push(n)}}}}return {visited,won:visited.has('4,2')}}
+function rounded(x,y,w,h,r,fill,stroke,lw=1){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke()}}
+function text(s,x,y,size,color,align='right',weight=700){ctx.font=`${weight} ${size}px Almarai, Arial, sans-serif`;ctx.textAlign=align;ctx.textBaseline='middle';ctx.direction=align==='left'?'ltr':'rtl';ctx.fillStyle=color;ctx.fillText(s,x,y)}
+function line(x1,y1,x2,y2,color,width=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+function drawBackground(now){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#23383d');g.addColorStop(.68,'#34494a');g.addColorStop(1,'#243338');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+// wall panel details
+ctx.fillStyle='rgba(236,215,174,.035)';for(let y=58;y<550;y+=122)ctx.fillRect(0,y,W,1);for(let x=35;x<W;x+=164)ctx.fillRect(x,0,1,548);
+// window
+rounded(76,25,196,98,12,'#233237','#506463',2);rounded(86,35,176,78,6,'#a9d3c8');ctx.fillStyle='#d5e7cc';ctx.beginPath();ctx.arc(218,57,15,0,Math.PI*2);ctx.fill();line(174,35,174,113,'#63887f',4);line(86,74,262,74,'#63887f',4);
+// warm task light
+let glow=ctx.createRadialGradient(844,100,10,844,100,330);glow.addColorStop(0,'rgba(250,193,113,.12)');glow.addColorStop(1,'rgba(250,193,113,0)');ctx.fillStyle=glow;ctx.fillRect(480,0,700,400);
+// tiled backsplash
+for(let y=420;y<545;y+=34)for(let x=15;x<W;x+=58){rounded(x,y,54,30,3,'rgba(194,204,176,.10)','rgba(223,219,181,.10)',1)}
+// countertop
+ctx.fillStyle='#d4b989';ctx.fillRect(0,535,W,18);ctx.fillStyle='#f0d7a8';ctx.fillRect(0,535,W,4);ctx.fillStyle='#4b4140';ctx.fillRect(0,553,W,167);
+// cupboard doors
+for(let x=28;x<W;x+=190){rounded(x,572,172,126,8,'#685d51','#98816a',2);rounded(x+8,580,156,110,5,'#766858','#927d64',1);ctx.fillStyle='#d8b27d';ctx.beginPath();ctx.arc(x+150,636,4,0,Math.PI*2);ctx.fill()}
+// floating accents
+ctx.fillStyle='#d5bd8c';rounded(1060,82,126,11,5,'#b99b6d');rounded(1084,90,8,66,2,'#b99b6d');rounded(1154,90,8,66,2,'#b99b6d');rounded(1084,150,78,7,3,'#b99b6d');
+// potted plant
+rounded(1100,164,50,45,7,'#a96349');for(let i=0;i<5;i++){let a=-2.7+i*.42;ctx.strokeStyle='#6b8a63';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(1125,167);ctx.quadraticCurveTo(1125+Math.cos(a)*25,135,1125+Math.cos(a)*37,124+Math.sin(a)*8);ctx.stroke();ctx.fillStyle='#7fa078';ctx.beginPath();ctx.ellipse(1125+Math.cos(a)*36,126+Math.sin(a)*8,8,14,a,0,Math.PI*2);ctx.fill()}
+}
+function drawPipe(t,cx,cy,active,now){const size=cell-6,x=cx-size/2,y=cy-size/2;let fill=t.kind==='source'?'#dce4d8':t.kind==='sink'?'#d7e3de':'#e8e4d7';let edge=t.kind==='source'?'#6c847a':'#a69b83';
+ctx.save();ctx.shadowColor='rgba(0,0,0,.24)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;rounded(x,y,size,size,15,fill,edge,2);ctx.restore();
+// inner face inset
+rounded(x+5,y+5,size-10,size-10,11,'#d7d4c7','rgba(255,255,255,.55)',1);
+const dirsNow=actual(t),radius=15,thick=19;
+ctx.lineCap='round';ctx.lineJoin='round';
+// pipe shadow and metal channel
+ctx.beginPath();for(const d of dirsNow){ctx.moveTo(cx+dirs[d].x*radius,cy+dirs[d].y*radius);ctx.lineTo(cx+dirs[d].x*(size*.42),cy+dirs[d].y*(size*.42));}
+ctx.strokeStyle='#766f62';ctx.lineWidth=thick+4;ctx.stroke();ctx.beginPath();for(const d of dirsNow){ctx.moveTo(cx+dirs[d].x*radius,cy+dirs[d].y*radius);ctx.lineTo(cx+dirs[d].x*(size*.42),cy+dirs[d].y*(size*.42));}ctx.strokeStyle='#b9b6aa';ctx.lineWidth=thick;ctx.stroke();
+ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.fillStyle='#b9b6aa';ctx.fill();
+// water animated in connected network
+if(active){let phase=(now/500)%1;ctx.beginPath();for(const d of dirsNow){ctx.moveTo(cx+dirs[d].x*(radius-3),cy+dirs[d].y*(radius-3));ctx.lineTo(cx+dirs[d].x*(size*.42),cy+dirs[d].y*(size*.42));}ctx.strokeStyle='#36b8c5';ctx.lineWidth=9;ctx.stroke();ctx.beginPath();ctx.arc(cx,cy,radius-3,0,Math.PI*2);ctx.fillStyle='#35b8c5';ctx.fill();ctx.beginPath();ctx.arc(cx,cy,3+Math.sin(now/160)*1.3,0,Math.PI*2);ctx.fillStyle='#d8ffff';ctx.fill();}
+// rotate affordance
+ctx.beginPath();ctx.arc(x+size-13,y+13,3,0,Math.PI*2);ctx.fillStyle='rgba(92,99,90,.32)';ctx.fill();
+if(t.kind==='source'){rounded(cx-15,cy-14,30,28,8,'#f4efe2','#98a293',1);text('◉',cx,cy,21,'#3f8e93','center',700)}else if(t.kind==='sink'){ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);ctx.fillStyle='#526e6b';ctx.fill();ctx.beginPath();ctx.arc(cx,cy,8,0,Math.PI*2);ctx.fillStyle=active?'#7ce4e6':'#b8c4b8';ctx.fill();}
+}
+function drawBoard(now,state){rounded(bx-19,by-17,cell*5+gap*4+38,cell*5+gap*4+34,22,'rgba(27,39,42,.88)','rgba(230,216,185,.24)',1);
+for(let y=0;y<N;y++)for(let x=0;x<N;x++){let t=board[y*N+x],px=bx+x*(cell+gap),py=by+y*(cell+gap),cx=px+cell/2,cy=py+cell/2,active=state.visited.has(`${x},${y}`);if(hover&&hover.x===x&&hover.y===y){ctx.fillStyle='rgba(255,223,153,.20)';ctx.beginPath();ctx.arc(cx,cy,cell*.56,0,Math.PI*2);ctx.fill()}drawPipe(t,cx,cy,active,now)}
+// inlet/outlet pipes and labels
+const mid=by+2*(cell+gap)+cell/2;rounded(14,mid-22,53,44,12,'#597b77','#9bb9a8',2);text('ماء',40,mid-1,15,'#f0e2c2','center');rounded(14,mid-3,58,6,3,'#42b9c3');
+rounded(72+5*(cell+gap)+5,mid-22,69,44,12,'#617568','#b4c39f',2);text('المغسلة',111,mid-1,14,'#f5e5c4','center');
+}
+function draw(now){drawBackground(now);const s=connected();drawBoard(now,s);if(s.won&&!won){won=true;winAt=now}
+// top bar
+rounded(72,28,1138,76,18,'rgba(17,30,33,.72)','rgba(235,219,186,.14)',1);text('السبّاك في البيت',1180,55,26,'#f5e8cb','right',800);text('مهمّة اليوم: أصلح الأنابيب قبل أن يفيض الماء!',1180,82,14,'#b7c8b9','right',400);
+// brand emblem
+rounded(86,42,45,45,13,'#d2ad78');text('🔧',108,65,24,'#24363a','center',700);
+// level badge
+rounded(796,44,90,37,12,'#374d4d');text(`المستوى ${level}`,841,63,15,'#eed8aa','center');
+let elapsed=Math.floor((now-started)/1000);rounded(689,44,92,37,12,'#374d4d');text(`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}`,735,63,16,'#e6e9d9','center');
+// progress and right info card
+rounded(679,145,531,396,24,'rgba(28,43,44,.93)','rgba(232,218,185,.18)',1);
+text('مهمّة إصلاح المطبخ',1172,184,24,'#f1e4c9','right',800);text('دوّر قطع الأنابيب لتوصل الماء إلى المغسلة.',1172,218,16,'#b9c7b8','right',400);
+// progress label/meter
+text('تدفّق الماء',1172,267,14,'#d8c8a4','right');text(`${Math.min(9,s.visited.size)} / 9`,713,267,13,'#97aaa0','left',400);rounded(713,282,459,10,5,'#425653');rounded(713,282,459*Math.min(1,s.visited.size/9),10,5,'#45b8b8');
+// 3 instruction steps
+const steps=[['١','اضغط على الأنبوب','كل ضغطة تدوّره ٩٠°'],['٢','رتّب المسار','من الصنبور إلى المغسلة'],['٣','أوقف التسريب','قبل أن يمتلئ المطبخ']];steps.forEach((v,i)=>{let yy=322+i*58;rounded(1134,yy-18,34,34,11,'#465c56');text(v[0],1151,yy,15,'#f1d7a3','center');text(v[1],1108,yy-6,15,'#e7e2cf','right',700);text(v[2],1108,yy+15,12,'#a5b6aa','right',400)});
+// buttons
+button(710,488,145,42,'إعادة الخلط','↻',false);button(870,488,145,42,`تلميح (${hints})`,'✦',hints===0);button(1030,488,145,42,muted?'الصوت مغلق':'الصوت','♫',false);
+// footer
+text('حرّك الأنابيب بلمسة أو بالفأرة • يمكنك اللعب دون اتصال',1204,589,13,'#c7c7ae','right',400);text('نصيحة: ابدأ بالأنابيب القريبة من الصنبور.',1204,612,13,'#8fa79e','right',400);
+// small status tag
+rounded(72,637,183,36,12,'rgba(21,34,36,.75)');ctx.beginPath();ctx.arc(93,655,5,0,Math.PI*2);ctx.fillStyle=won?'#f2c371':'#65c6a9';ctx.fill();text(won?'تم الإصلاح بنجاح':'الأنابيب جاهزة للإصلاح',239,655,13,'#d7ddc9','right',400);
+if(won){ctx.fillStyle='rgba(13,25,27,.56)';ctx.fillRect(0,0,W,H);rounded(368,222,544,277,28,'#f0e8d5','#d7bd8a',3);text('ممتاز! عاد الماء يتدفّق 🎉',640,281,28,'#314641','center',800);text('أصلحت أنابيب البيت بنجاح.',640,326,17,'#617166','center',400);let sec=Math.max(0,Math.floor((now-winAt)/1000));text(`الوقت: ${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(elapsed%60).padStart(2,'0')}   •   ${sec>2?'البيت صار جافّاً!':'أداء رائع!'}`,640,364,15,'#8a806b','center',400);rounded(510,407,260,55,16,'#49685d');text('المستوى التالي  ←',640,435,18,'#fff0ce','center',700)}
+// portrait prompt
+if(innerHeight>innerWidth){ctx.fillStyle='rgba(13,24,27,.78)';ctx.fillRect(0,0,W,H);rounded(386,249,508,222,26,'#f0e8d5','#d8bc8a',2);text('اللعبة أفضل بالوضع الأفقي',640,310,25,'#314640','center',800);text('أدر جهازك للعب براحة',640,354,18,'#67756b','center',400);text('↻',640,411,45,'#bb8d53','center',700)}
+requestAnimationFrame(draw)}
+function button(x,y,w,h,label,icon,disabled){rounded(x,y,w,h,12,disabled?'#354644':'#50685d',disabled?'#45534d':'#80947b',1);text(icon,x+w-23,y+h/2,18,disabled?'#77857b':'#f1d39c','center',700);text(label,x+w-44,y+h/2,13,disabled?'#7e8d82':'#f1e9d5','right',700)}
+function point(e){let r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left-ox)/scale,y:(e.clientY-r.top-oy)/scale}}
+function handle(e){e.preventDefault();let p=point(e);if(innerHeight>innerWidth)return;
+if(won){if(p.x>480&&p.x<800&&p.y>398&&p.y<468){level++;newGame()}return}
+if(p.x>=bx&&p.x<bx+5*(cell+gap)-gap&&p.y>=by&&p.y<by+5*(cell+gap)-gap){let x=Math.floor((p.x-bx)/(cell+gap)),y=Math.floor((p.y-by)/(cell+gap));if(x<N&&y<N){let t=board[y*N+x];t.rot=mod(t.rot+1,4);if(!muted){try{const ac=new(window.AudioContext||window.webkitAudioContext)();let o=ac.createOscillator(),g=ac.createGain();o.frequency.value=420;g.gain.value=.025;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.045);o.onended=()=>ac.close()}catch{}}return}}
+if(p.y>=480&&p.y<=537){if(p.x>=710&&p.x<=855){newGame();return}if(p.x>=870&&p.x<=1015&&hints>0){hints--;let wrong=board.find(t=>t.solution.length&&actual(t).some(d=>!t.solution.includes(d)));if(wrong){for(let turn=0;turn<4;turn++){if(actual(wrong).slice().sort().join(',')===wrong.solution.slice().sort().join(','))break;wrong.rot=mod(wrong.rot+1,4)}}return}if(p.x>=1030&&p.x<=1175){muted=!muted;return}}
+}
+canvas.addEventListener('pointerdown',handle);canvas.addEventListener('pointermove',e=>{let p=point(e);if(p.x>=bx&&p.y>=by&&p.x<bx+5*(cell+gap)&&p.y<by+5*(cell+gap))hover={x:Math.floor((p.x-bx)/(cell+gap)),y:Math.floor((p.y-by)/(cell+gap))};else hover=null});addEventListener('keydown',e=>{if(e.key==='r'||e.key==='R')newGame();if(e.key===' '&&won){level++;newGame()}});
+newGame();requestAnimationFrame(draw);
+})();
+</script></body></html>
