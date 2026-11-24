@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>مكعب روبيك 2×2</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"><span></span><span></span><span></span><span></span></div>
+        <div><h1>مكعب روبيك</h1><p>تحدي 2 × 2</p></div>
+      </div>
+      <button id="soundBtn" class="icon-btn" aria-label="الصوت"><svg viewBox="0 0 24 24"><path d="M11 5 6.8 8.5H3.5v7h3.3L11 19V5Zm4.2 3.1a5.5 5.5 0 0 1 0 7.8M18 5.3a9 9 0 0 1 0 13.4"/></svg></button>
+    </header>
+
+    <section class="game-card">
+      <div class="stats">
+        <div class="stat"><span>الوقت</span><strong id="timer">00:00</strong></div>
+        <div class="stat moves"><span>الحركات</span><strong id="moves">0</strong></div>
+      </div>
+
+      <div id="scene" class="scene" aria-label="مكعب الروبيك">
+        <div id="cubeRig" class="cube-rig"><div id="cube" class="cube"></div></div>
+        <div class="shadow"></div>
+      </div>
+
+      <div class="status-row">
+        <button id="undoBtn" class="small-btn" title="تراجع"><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5M5 12h8a6 6 0 0 1 6 6"/></svg><span>تراجع</span></button>
+        <div id="status" class="status">اسحب المكعب لتدويره</div>
+        <button id="resetViewBtn" class="small-btn" title="إعادة النظر"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/></svg><span>عرض</span></button>
+      </div>
+
+      <div class="controls" aria-label="حركات المكعب">
+        <div class="face-controls">
+          <button class="face-btn" data-move="U"><b>U</b><small>أعلى</small></button>
+          <button class="face-btn" data-move="D"><b>D</b><small>أسفل</small></button>
+        </div>
+        <div class="face-controls">
+          <button class="face-btn" data-move="L"><b>L</b><small>يسار</small></button>
+          <button class="face-btn" data-move="R"><b>R</b><small>يمين</small></button>
+        </div>
+        <div class="face-controls">
+          <button class="face-btn" data-move="F"><b>F</b><small>أمام</small></button>
+          <button class="face-btn" data-move="B"><b>B</b><small>خلف</small></button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="shuffleBtn" class="shuffle-btn"><svg viewBox="0 0 24 24"><path d="M17 3h4v4M3 6h3c5 0 5 12 10 12h5M17 21h4v-4M3 18h3c2.2 0 3.4-2.3 4.5-5"/></svg>خلط المكعب</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="winModal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="win-cube">✓</div>
+      <h2>أحسنت!</h2>
+      <p>حللت المكعب في <b id="winMoves">0</b> حركة</p>
+      <p class="win-time"><span>الوقت</span><b id="winTime">00:00</b></p>
+      <button id="againBtn">لعب مرة أخرى</button>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
